@@ -39,19 +39,31 @@ public class Client {
         DataOutputStream versoServer = new DataOutputStream(new BufferedOutputStream(finalClient.getOutputStream()));
 
         String message = "";
-        String server_message;
-        while (!message.equals("exit")) {
-            System.out.print("\nInserisci un messaggio: ");
+        String server_message = "";
+
+        while(true) {
+            while(daServer.ready()) {
+                server_message = daServer.readLine();
+                System.out.println("server: " + server_message);
+            }
+
+            System.out.print("Inserisci un messaggio: ");
             message = input.nextLine();
             if (message.equals("")) {
                 System.out.println("Il messaggio non può essere vuoto");
+                continue;
             }
 
             versoServer.writeBytes(message + "\r\n");
             versoServer.flush();
 
             server_message = daServer.readLine();
-            System.out.println("server: " + server_message);
+            if (server_message == null) {
+                System.out.println("Il server ha chiuso la connessione");
+                break;
+            }
+
+            System.out.println("\nserver: " + server_message);
         }
 
         client.close();
