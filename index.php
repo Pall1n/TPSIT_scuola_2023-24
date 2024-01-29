@@ -31,7 +31,7 @@ $dirs = array_reverse($dirs);
             </a>
         </div>
         <div class="navbar-center mx-5">
-            <h1 class="text-xl font-bold">PHP Paolo Larosa - test3</h1>
+            <h1 class="text-xl font-bold">PHP Paolo Larosa - test4</h1>
         </div>
         <div class="navbar-end">
             <label class="swap swap-rotate">
