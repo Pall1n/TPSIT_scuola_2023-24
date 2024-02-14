@@ -100,6 +100,7 @@
     <p>Modello: <strong><?php echo $modello ?></strong></p>
     <p>Motore: <strong><?php echo $motore ?></strong></p><br>
     <p style="width: 300px;">Optionals: <strong><?php echo empty($optionals) ? "nessuno" : implode(", ", $optionals) ?></strong></p><br>
+    <p style="width: 300px;">Annotazioni: <strong><?php echo empty($annotazioni) ? "nessuna annotazione" : $annotazioni ?></strong></p><br>
     <p>Costo finale: <strong><?php echo $costo_finale ?>€</strong></p>
 </body>
 
