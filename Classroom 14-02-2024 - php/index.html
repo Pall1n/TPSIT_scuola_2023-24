@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolo preventivo</title>
+    <style>
+        p {
+            margin: 0;
+        }
+
+        body {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="preventivo.php" method="POST">
+        <label for="nome">Nome: </label>
+        <input type="text" name="nome" id="nome" required><br>
+        <label for="cognome">Cognome: </label>
+        <input type="text" name="cognome" id="cognome" required><br><br>
+        <label for="modello">Modello:</label>
+        <select name="modello" id="modello"></select><br><br>
+        <p id="prezzo_base"></p>
+        <br>
+        <p>Motore:</p>
+        <div id="motori"></div>
+        <br>
+        <p>Optional:</p>
+        <div id="optionals"></div>
+        <br>
+        <label for="annotazioni">Annotazioni: </label><br>
+        <textarea name="annotazioni" id="annotazioni" cols="30" rows="4" style="resize: none"></textarea><br><br>
+
+        <input type="submit" value="Invia" style="margin: auto; display: block">
+    </form>
+
+    <script>
+        async function fetchDati() {
+            var auto = await fetch("./preventivo.php")
+                .then((response) => response.json())
+                .catch((error) => console.error(error));
+            var modello_select = document.getElementById("modello");
+            var prezzo_base = document.getElementById("prezzo_base");
+            var motori_div = document.getElementById("motori");
+            var optionals_div = document.getElementById("optionals");
+
+            for (const modello in auto) {
+                var option = document.createElement("option");
+                option.value = modello;
+                option.innerText = modello;
+                modello_select.appendChild(option);
+            }
+
+            function cambiaModello() {
+                prezzo_base.innerText = "Prezzo base: " + auto[modello_select.value].prezzo_base + "€";
+                
+                motori_div.innerHTML = "";
+                for (const motore in auto[modello_select.value].motore) {
+                    var input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = "motore";
+                    input.value = motore;
+                    input.id = motore;
+                    input.checked = !auto[modello_select.value].motore[motore];
+                    motori_div.appendChild(input);
+                    var label = document.createElement("label");
+                    label.htmlFor = motore;
+                    label.innerText = motore + " - " + (auto[modello_select.value].motore[motore] != 0 ? auto[modello_select.value].motore[motore] + "€" : "base");
+                    motori_div.appendChild(label);
+                    motori_div.appendChild(document.createElement("br"));
+                }
+
+                optionals_div.innerHTML = "";
+                for (const optional in auto[modello_select.value].optionals) {
+                    var input = document.createElement("input");
+                    input.type = "checkbox";
+                    input.name = "optionals[]";
+                    input.value = optional;
+                    input.id = optional;
+                    optionals_div.appendChild(input);
+                    var label = document.createElement("label");
+                    label.htmlFor = optional;
+                    label.innerText = optional + " - " + auto[modello_select.value].optionals[optional] + "€";
+                    optionals_div.appendChild(label);
+                    optionals_div.appendChild(document.createElement("br"));
+                }
+            }
+
+            cambiaModello();
+
+            modello_select.addEventListener("change", cambiaModello);
+        }
+
+        fetchDati();
+    </script>
+</body>
+
+</html>
