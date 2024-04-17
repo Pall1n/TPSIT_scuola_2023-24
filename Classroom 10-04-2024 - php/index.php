@@ -6,8 +6,12 @@
     $dbname = "tpsit_10_04_2024";
 
     try {
-        $conn = new mysqli($host, $user, $password, $dbname);
+        @$conn = new mysqli($host, $user, $password, $dbname);
     } catch (Exception $e) {
+        die("Errore di connessione al database");
+    }
+
+    if ($conn->connect_error) {
         die("Errore di connessione al database");
     }
 
