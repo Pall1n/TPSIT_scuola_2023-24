@@ -133,7 +133,7 @@
             <label for="autore">Autore:</label>
             <input type="text" name="autore" placeholder="Mario Rossi" id="autore" required>
             <label for="disponibile">Disponibile:</label><input type="checkbox" name="disponibile" id="disponibile">
-            <input type="submit" value="Inserisci">
+            <input type="submit" name="inserisci" value="Inserisci">
         </form>
 
         <?php
