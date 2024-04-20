@@ -19,9 +19,9 @@
     $all_libri = $conn->query($all_libri_query);
 
     function verifica_attributi() {
-        if (isset($_POST["inserisci"]) and isset($_POST["titolo"]) and isset($_POST["autore"]) and !empty($_POST["titolo"]) and !empty($_POST["autore"])){
+        if ((isset($_POST["inserisci"]) or (isset($_POST["aggiorna"]) and isset($_POST["id"]) and !empty($_POST["id"]))) and isset($_POST["titolo"]) and isset($_POST["autore"]) and !empty($_POST["titolo"]) and !empty($_POST["autore"])){
             return true;
-        } else if ((isset($_POST["cancella"]) or isset($_POST["aggiorna"]) or isset($_POST["inverti_disponibilita"])) and isset($_POST["id"]) and !empty($_POST["id"])) {
+        } else if ((isset($_POST["cancella"]) or isset($_POST["inverti_disponibilita"])) and isset($_POST["id"]) and !empty($_POST["id"])) {
             return true;
         }
         return false;
@@ -47,10 +47,16 @@
             } else {
                 $id = $_POST["id"];
 
-                $update_query = $conn->prepare("UPDATE libri SET titolo = ?, autore = ?, disponibile = ? WHERE id = ?");
-                $update_query->bind_param("ssii", $titolo, $autore, $disponibile, $id);
+                $select_query = $conn->prepare("SELECT 1 FROM libri WHERE id = ?");
+                $select_query->bind_param("i", $id);
+                $select_query->execute();
+                $result = $select_query->get_result();
+                verifica_risultato_vuoto($result->num_rows);
+                $select_query->close();
+
+                $update_query = $conn->prepare("UPDATE libri SET titolo = ?, autore = ? WHERE id = ?");
+                $update_query->bind_param("ssi", $titolo, $autore, $id);
                 $update_query->execute();
-                verifica_risultato_vuoto($update_query->affected_rows);
                 $update_query->close();
             }
             
@@ -76,8 +82,10 @@
 
             header("Location: index.php");
         } else {
-            die("Errore: richiesta non valida");
+            exit("Errore: richiesta non valida");
         }
+    } else if($_SERVER["REQUEST_METHOD"] == "POST") {
+        exit("Errore: richiesta non valida");
     }
 
     $conn->close();
@@ -154,22 +162,59 @@
 
                     echo <<<HTML
                         <tr>
-                            <td>{$row["titolo"]}</td>
-                            <td>{$row["autore"]}</td>
-                            <td>{$disponibile}</td>
-                            <td>{$row["data_inserimento"]}</td>
-                            <td>
-                                <form method="post">
+                            <form method="post">
+                                <td><input type="text" name="titolo" value="{$row["titolo"]}" required disabled></td>
+                                <td><input type="text" name="autore" value="{$row["autore"]}" required disabled></td>
+                                <td>{$disponibile}</td>
+                                <td>{$row["data_inserimento"]}</td>
+                                <td>
                                     <input type="hidden" name="id" value="{$row["id"]}">
+                                    <input type="submit" id="aggiorna" name="aggiorna" value="Aggiorna">
                                     <input type="submit" name="cancella" value="Cancella">
                                     <input type="submit" name="inverti_disponibilita" value="Inverti disponibilità">
-                                </form>
-                            </td>
+                                </td>
+                            </form>
                         </tr>
                     HTML;
                 }
 
-                echo "</table>";
+                echo <<<HTML
+                    </table>
+
+                    <script>
+                        document.querySelectorAll("#aggiorna").forEach((aggiorna) => {
+                            aggiorna.addEventListener("click", (e) => {
+                                if(e.target.parentElement.parentElement.querySelector("input[name='titolo']").disabled) {
+                                    e.preventDefault();
+                                    e.target.parentElement.parentElement.querySelector("input[name='titolo']").disabled = false;
+                                    e.target.parentElement.parentElement.querySelector("input[name='autore']").disabled = false;
+
+                                    document.querySelectorAll("input[type='submit']").forEach((submit) => {
+                                        if(submit !== e.target) {
+                                            submit.disabled = true;
+                                        }
+                                    });
+
+                                    const annulla = document.createElement("input");
+                                    annulla.type = "submit";
+                                    annulla.value = "Annulla";
+                                    annulla.addEventListener("click", () => {
+                                        e.target.parentElement.parentElement.querySelector("input[name='titolo']").disabled = true;
+                                        e.target.parentElement.parentElement.querySelector("input[name='autore']").disabled = true;
+
+                                        document.querySelectorAll("input[type='submit']").forEach((submit) => {
+                                            submit.disabled = false;
+                                        });
+                                        
+                                        annulla.remove();
+                                    });
+
+                                    e.target.parentElement.appendChild(annulla);
+                                }
+                            });
+                        });
+                    </script>
+                HTML;
             }
         ?>
     </body>
