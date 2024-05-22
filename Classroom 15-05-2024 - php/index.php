@@ -122,20 +122,8 @@ function check_libri_collegati($id, $tipo)
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
-
-    // Condizione per verificare se esiste almeno una casa editrice nel database
-
-    /*  Ho implementato questa verifica per permettere alla pagina "create_casa_editrice.html" 
-        di essere visualizzata solo se non esiste alcuna casa editrice  */
-    if (isset($_GET["esiste_casa_editrice"])) {
-        $casa_editrice = $conn->query("SELECT 1 FROM case_editrici");
-        $esiste = $casa_editrice->num_rows > 0;
-        echo $esiste;
-        exit;
-    }
-
-    /*  Se l'id della casa editrice non è stato passato come parametro GET, allora seleziono la prima casa editrice presente nel database
-        Se non esiste alcuna casa editrice, allora reindirizzo l'utente alla pagina "create_casa_editrice.html" */
+    /*  Se l'id della casa editrice non è stato passato come parametro GET, allora seleziono la prima casa editrice presente nel database 
+        Se non esiste alcuna casa editrice, semplicemente non faccio alcuna interrogazione al database sulla tabella "libri"   */
     if (isset($_GET["id_casa_editrice"]) and !empty($_GET["id_casa_editrice"])) {
         $id_casa_editrice = $_GET["id_casa_editrice"];
         $info_casa_editrice = check_casa_editrice($id_casa_editrice);
